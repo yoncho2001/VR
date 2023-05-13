@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>E1113: Кубична текстура</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="three.min.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script src="vax.js"></script>
+</head>
+
+<body>
+    <script>
+        vaxInit({ antialias: true, alpha: true });
+
+        camera.fov = 30;
+        onWindowResize();
+
+       // var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        
+
+
+        scene.background = new THREE.CubeTextureLoader().load([
+            'posx.jpg', 'negx.jpg',
+            'posy.jpg', 'negy.jpg',
+            'posz.jpg', 'negz.jpg']);
+
+
+        var geometryOc = new THREE.OctahedronGeometry(30, 1);
+
+        var count = 30;
+        var octagons = [];
+        for (var i = 0; i < count; i++) {
+            var materialOc = new THREE.MeshPhysicalMaterial({
+                reflectivity: 1,
+                transmission: 1,
+                ior: 1.1,
+                roughness: 0.2,
+                color: 0xffffff,
+
+                envMap: scene.background,
+                envMapIntensity: 1.5
+
+            });
+            var octagon = new THREE.Mesh(geometryOc, materialOc);
+            var r = THREE.MathUtils.randFloat(300, 500);
+            var a = THREE.MathUtils.randFloat(02, 2 * Math.PI);
+            var b = THREE.MathUtils.randFloat(Math.PI / 8, Math.PI / 2);
+            octagon.position.setFromSphericalCoords(r, b, a);
+
+            octagons.push(octagon);
+            scene.add(octagon);
+        }
+
+
+        function animate(t) {
+
+            for (var i = 0; i < count; i++)
+                octagons[i].rotation.y = t + i;
+
+           //controls.update();
+        }
+
+        window.addEventListener("deviceorientation", deviceOrientation, true);
+
+        function deviceOrientation(event) {
+
+            var alpha = event.alpha,
+                gamma = event.gamma;
+
+            if (alpha === null) return;
+
+
+            if (gamma >= 0)
+                gamma = 90 - gamma;
+            else {
+                alpha = alpha + 180;
+                gamma = -90 - gamma;
+            }
+
+
+            alpha = THREE.MathUtils.degToRad(alpha);
+            gamma = THREE.MathUtils.degToRad(gamma);
+
+
+            camera.rotation.set(gamma, alpha, 0, 'YXZ');
+        }
+
+    </script>
+
+</body>
+
+</html>
